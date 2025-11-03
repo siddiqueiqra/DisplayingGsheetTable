@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consultation CRM | American Hairline</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root{
+      --navy-primary:#1e3a8a; --navy-dark:#1e293b; --navy-light:#3b82f6;
+      --off-white:#fafaf9; --border:#e7e5e4; --text-dark:#292524; --text-light:#78716c;
+      --success:#10b981; --success-dark:#059669; --danger:#ef4444;
+    }
+    body{
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);;
+      padding:10px;
+    }
+
+    /* 🎯 MAIN CONTAINER - Everything inside one box */
+    .main-wrapper{
+      max-width:1400px;
+      margin:0 auto;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 4px 20px rgba(0,0,0,.1);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      max-height:95vh;
+    }
+
+    /* ✅ COMPACT HEADER (was .top-nav) */
+    .top-nav{
+      background:linear-gradient(135deg,var(--navy-dark),var(--navy-primary));
+      box-shadow:none;
+      flex-shrink:0;
+    }
+    .nav-container{
+      max-width:100%;
+      margin:0;
+      padding:14px 24px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .brand{display:flex;align-items:center;gap:12px;color:#fff}
+    .brand-logo{
+      background:#fff;color:var(--navy-primary);
+      width:40px;height:40px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:18px;
+      box-shadow:0 2px 8px rgba(0,0,0,.1)
+    }
+    .brand-text h1{font-size:16px;font-weight:800}
+    .brand-text p{font-size:11px;opacity:.85}
+    .nav-right{display:flex;gap:12px;align-items:center}
+    .user-info{
+      background:rgba(255,255,255,.15);
+      padding:6px 14px;border-radius:8px;
+      color:#fff;font-size:13px;font-weight:600;
+      display:flex;gap:8px;align-items:center
+    }
+    .btn-light{
+      background:#fff;color:var(--navy-primary);
+      padding:8px 16px;border:none;border-radius:8px;
+      font-weight:600;cursor:pointer;transition:.2s;
+      font-size:13px;
+    }
+    .btn-light:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,255,255,.3)}
+
+    /* ✅ COMPACT STATS (inline grid) */
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:1px;
+      background:var(--border);
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .stat-card{
+      background:#fff;
+      border:none;border-radius:0;
+      padding:16px 20px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      position:relative;
+      overflow:visible;
+      transition:.2s;
+      text-align:center;
+    }
+    .stat-card::before{display:none}
+    .stat-card:hover{transform:none;box-shadow:none;background:#f9fafb}
+    .stat-icon{
+      width:auto;height:auto;
+      border-radius:0;background:transparent;
+      display:block;
+      font-size:24px;
+      margin:0;
+    }
+    .stat-content{display:contents}
+    .stat-content h3{
+      font-size:10px;color:var(--text-light);
+      letter-spacing:.5px;text-transform:uppercase;
+      margin:0;order:2;
+    }
+    .stat-content p{font-size:28px;font-weight:800;order:1}
+
+    /* ✅ SCROLLABLE CONTENT AREA */
+    .container{
+      max-width:100%;
+      margin:0;
+      padding:20px 24px;
+      overflow-y:auto;
+      flex:1;
+    }
+
+    /* Control Bar - More compact */
+    .control-bar{
+      background:transparent;
+      border:none;border-radius:0;
+      padding:0 0 16px 0;
+      margin-bottom:16px;
+      box-shadow:none;
+      border-bottom:2px solid var(--border);
+    }
+    .control-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .control-top h2{font-size:18px;font-weight:800;color:var(--navy-dark)}
+    .info-text{
+      background:#eff6ff;border:1px solid #bfdbfe;
+      padding:6px 12px;border-radius:8px;
+      font-size:12px;color:#1e40af;font-weight:600
+    }
+    .filters{display:flex;gap:10px;flex-wrap:wrap}
+    .search-wrapper{position:relative;flex:1;min-width:240px;max-width:400px}
+    .search-wrapper input{
+      width:100%;
+      padding:10px 14px 10px 38px;
+      border:1px solid var(--border);
+      border-radius:10px;background:#fff;
+      font-size:13px;
+    }
+    .search-wrapper input:focus{
+      outline:none;border-color:var(--navy-light);
+      box-shadow:0 0 0 3px rgba(59,130,246,.1)
+    }
+    .search-icon{
+      position:absolute;left:12px;top:50%;
+      transform:translateY(-50%);color:var(--text-light);
+      font-size:14px;
+    }
+    select{
+      padding:9px 14px;
+      border:1px solid var(--border);
+      border-radius:8px;background:#fff;
+      font-weight:600;font-size:13px;
+    }
+
+    /* ✅ COMPACT LIST (table-like layout) */
+    .list-container{
+      background:transparent;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:none;
+      overflow:hidden;
+    }
+    .list-item{
+      display:flex;
+      align-items:center;
+      gap:20px;
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      cursor:pointer;
+      transition:.15s;
+    }
+    .list-item:last-child{border-bottom:none}
+    .list-item:hover{background:#f6f7fb;transform:translateX(2px)}
+    .list-item.selected{background:#eff6ff;border-left:3px solid var(--navy-primary)}
+    
+    .avatar{
+      width:48px;height:48px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--navy-primary),var(--navy-light));
+      color:#fff;font-weight:800;font-size:16px;
+      display:grid;place-items:center;
+      flex-shrink:0;
+    }
+    .list-content{
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:24px;
+    }
+    .client-info{flex:1.5;min-width:180px}
+    .client-info h4{font-size:15px;font-weight:700;margin-bottom:4px}
+    .lead-id{
+      display:inline-block;
+      background:#f3f4f6;
+      padding:3px 8px;border-radius:5px;
+      font-size:10px;color:var(--text-light);
+      font-weight:700;
+    }
+    .contact-info{flex:1}
+    .location-info{flex:1}
+    .info-row{
+      display:flex;gap:6px;
+      color:var(--text-dark);
+      font-size:13px;margin-bottom:3px;
+    }
+    .status-info{min-width:140px;text-align:center}
+    .status{
+      display:inline-block;
+      padding:6px 14px;border-radius:16px;
+      font-size:10px;font-weight:800;
+      letter-spacing:.5px;
+    }
+    .status.pending{background:#fed7aa;color:#9a3412}
+    .status.done{background:#d1fae5;color:#065f46}
+    .status.booked{background:#dbeafe;color:#1e40af}
+    
+    .action-btn{flex:0 0 auto}
+    .btn-fill{
+      background:linear-gradient(135deg,var(--navy-primary),var(--navy-light));
+      color:#fff;
+      padding:10px 18px;border:none;border-radius:10px;
+      font-weight:700;font-size:12px;
+      box-shadow:0 3px 10px rgba(30,58,138,.2);
+      cursor:pointer;transition:.2s;
+      display:flex;gap:6px;align-items:center;
+    }
+    .btn-fill:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(30,58,138,.3)}
+    
+    .empty-state{padding:60px 20px;text-align:center;color:var(--text-light)}
+
+    /* Modal - keep same */
+    .modal-overlay{
+      position:fixed;inset:0;
+      background:rgba(30,41,59,.8);backdrop-filter:blur(4px);
+      display:none;align-items:center;justify-content:center;
+      z-index:1000;padding:20px;overflow-y:auto;
+    }
+    .modal-overlay.active{display:flex}
+    .modal{
+      background:#fff;border-radius:20px;
+      max-width:900px;width:100%;
+      max-height:90vh;overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+      animation:slideUp .25s ease;
+    }
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .modal-header{
+      position:sticky;top:0;z-index:2;
+      background:linear-gradient(135deg,var(--navy-dark),var(--navy-primary));
+      color:#fff;padding:24px 28px;
+      border-radius:20px 20px 0 0;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .modal-header h2{font-size:20px;font-weight:800}
+    .modal-close{
+      background:rgba(255,255,255,.2);border:none;
+      width:40px;height:40px;border-radius:10px;
+      color:#fff;font-size:18px;font-weight:700;
+      cursor:pointer;transition:.2s;
+    }
+    .modal-close:hover{background:rgba(255,255,255,.3);transform:rotate(90deg)}
+    .modal-body{padding:28px}
+
+    .client-info-box{
+      background:#eff6ff;border:2px solid #bfdbfe;
+      border-radius:12px;padding:18px;margin-bottom:24px;
+      display:grid;grid-template-columns:auto 1fr;
+      gap:16px;align-items:center;
+    }
+    .client-info-avatar{
+      width:64px;height:64px;border-radius:16px;
+      background:linear-gradient(135deg,var(--navy-primary),var(--navy-light));
+      color:#fff;display:grid;place-items:center;font-weight:800;
+    }
+    .client-info-details h3{font-size:18px;font-weight:800;margin-bottom:6px}
+    .client-info-details p{font-size:14px;color:var(--text-light);margin-bottom:2px}
+
+    .form-section{margin-bottom:24px}
+    .form-section h3{
+      font-size:14px;color:var(--navy-primary);font-weight:900;
+      text-transform:uppercase;letter-spacing:.6px;
+      margin-bottom:14px;padding-bottom:10px;
+      border-bottom:3px solid #f3f4f6;
+      display:flex;gap:10px;align-items:center;
+    }
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px}
+    .form-group{margin-bottom:14px}
+    .form-group.full{grid-column:1 / -1}
+    .form-group label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+    .form-group label .required{color:var(--danger)}
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;padding:12px 14px;
+      border:2px solid var(--border);border-radius:10px;
+      font-size:14px;background:#fff;
+    }
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+      outline:none;border-color:var(--navy-light);
+      box-shadow:0 0 0 4px rgba(59,130,246,.08);
+    }
+    .form-group input[readonly]{background:#f6f7fb;color:var(--text-light)}
+    .form-helper{font-size:12px;color:var(--text-light);margin-top:6px}
+
+    .checkbox-group{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+    .checkbox-item{display:flex;gap:8px;align-items:center}
+
+    .form-actions{
+      display:flex;gap:12px;margin-top:18px;
+      position:sticky;bottom:0;background:#fff;
+      padding:18px 0;border-top:2px solid #f3f4f6;
+    }
+    .btn-large{flex:1;padding:14px 18px;border-radius:12px;font-weight:800;border:none;cursor:pointer}
+    .btn-save{
+      background:linear-gradient(135deg,var(--success),var(--success-dark));
+      color:#fff;box-shadow:0 4px 12px rgba(16,185,129,.3);
+    }
+    .btn-cancel{background:#fff;border:2px solid var(--border)}
+
+    /* Toast */
+    #popupMessage{
+      display:none;position:fixed;top:20px;right:20px;
+      background:var(--success);color:#fff;
+      padding:14px 18px;border-radius:12px;
+      box-shadow:0 8px 24px rgba(0,0,0,.2);
+      font-weight:800;z-index:2000;
+      opacity:0;transform:translateX(20px);
+      transition:opacity .25s,transform .25s;
+    }
+    #popupMessage.show{display:flex;gap:10px;align-items:center;opacity:1;transform:translateX(0)}
+
+    /* Responsive */
+    @media (max-width:1200px){
+      .list-content{flex-wrap:wrap;gap:14px}
+      .client-info,.contact-info,.location-info{flex:1 1 45%}
+      .status-info,.action-btn{flex:1 1 100%}
+    }
+    @media (max-width:768px){
+      body{padding:10px}
+      .main-wrapper{max-height:100vh;border-radius:12px}
+      .nav-container{padding:12px 16px}
+      .container{padding:16px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .list-item{flex-direction:column;align-items:flex-start;padding:12px 14px}
+      .list-content{width:100%;flex-direction:column;gap:10px}
+      .form-row{grid-template-columns:1fr}
+      .client-info-box{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- 🎯 MAIN WRAPPER - Everything inside one container -->
+  <div class="main-wrapper">
+    <!-- Top Navigation -->
+    <div class="top-nav">
+      <div class="nav-container">
+        <div class="brand">
+          <div class="brand-logo">AH</div>
+          <div class="brand-text">
+            <h1>American Hairline</h1>
+            <p>Pre-Consultation Form System</p>
+          </div>
+        </div>
+        <div class="nav-right">
+          <div class="user-info"><span>👤</span><span id="userDisplay">CRM Staff</span></div>
+          <button class="btn-light" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-content"><h3>Total Clients</h3><p id="statTotal">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-content"><h3>Forms Pending</h3><p id="statPending">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-content"><h3>Forms Completed</h3><p id="statCompleted">0</p></div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-content"><h3>Today's Forms</h3><p id="statToday">0</p></div></div>
+    </div>
+
+    <!-- Main Container (Scrollable) -->
+    <div class="container">
+      <!-- Control Bar -->
+      <div class="control-bar">
+        <div class="control-top">
+          <h2>Select Client to Fill Consultation Form</h2>
+          <div class="info-text">💡 Click on a client, then click "Fill Form"</div>
+        </div>
+
+        <div class="filters">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input id="searchInput" placeholder="Search by name, mobile, or Lead ID..." oninput="filterClients()"/>
+          </div>
+          <select id="cityFilter" onchange="filterClients()">
+            <option value="All">All Cities</option>
+          </select>
+          <select id="statusFilter" onchange="filterClients()">
+            <option value="All">All Status</option>
+            <option value="Pending">Form Pending</option>
+            <option value="Completed">Form Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="list-container">
+        <div id="listContent"></div>
+        <div id="emptyState" class="empty-state" style="display:none">
+          <div style="font-size:64px;margin-bottom:8px">🔍</div>
+          <h3>No clients found</h3>
+          <p>Try adjusting your filters</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="popupMessage"><span style="font-size:18px">✅</span><span>Consultation Form Saved Successfully!</span></div>
+
+  <!-- Modal -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h2>📋 Pre-Consultation Form</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="client-info-box">
+          <div id="modalAvatar" class="client-info-avatar">AA</div>
+          <div class="client-info-details">
+            <h3 id="modalClientName">Client Name</h3>
+            <p><strong>Lead ID:</strong> <span id="modalLeadId">—</span></p>
+            <p><strong>Mobile:</strong> <span id="modalMobile">—</span></p>
+            <p><strong>City:</strong> <span id="modalCity">—</span></p>
+          </div>
+        </div>
+
+        <form id="consultationForm" onsubmit="event.preventDefault(); saveConsultationForm();">
+          <input type="hidden" id="fLeadId" />
+
+          <!-- Personal Info -->
+          <div class="form-section">
+            <h3>👤 Personal Information</h3>
+            <div class="form-group"><label>Timestamp</label><input id="fTimestamp" readonly /></div>
+            <div class="form-row">
+              <div class="form-group"><label>Full Name <span class="required">*</span></label><input id="fFullName" required /></div>
+              <div class="form-group"><label>WhatsApp <span class="required">*</span></label><input id="fWhatsApp" required /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Email</label><input id="fEmail" type="email" /></div>
+              <div class="form-group"><label>Age</label><input id="fAge" type="number" min="18" max="100" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Date of Birth</label><input id="fDOB" type="date" /></div>
+              <div class="form-group"><label>City</label><input id="fCity" /></div>
+            </div>
+            <div class="form-group">
+              <label>Source</label>
+              <select id="fSource">
+                <option value="">— Select —</option>
+                <option>Google Ads</option><option>Facebook/Instagram</option><option>Referral</option>
+                <option>Walk-in</option><option>Website</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Interest & Preferences -->
+          <div class="form-section">
+            <h3>💡 Interest & Preferences</h3>
+            <div class="form-group">
+              <label>Interested In</label>
+              <select id="fInterest">
+                <option value="">— Select —</option>
+                <option>Non-surgical hair replacement / hair system</option>
+                <option>Hair transplant</option>
+                <option>Scalp micro pigmentation</option>
+                <option>Hairline patch</option>
+                <option>Not sure looking for guidance</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Attachment Method</label>
+                <select id="fAttachment">
+                  <option value="">— Select —</option>
+                  <option>Clip on</option><option>Clip on + F.R Tape</option><option>Stick-on</option>
+                  <option>Not sure, need guidance</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Preferred System Type</label>
+                <select id="fSystemType">
+                  <option value="">— Select —</option>
+                  <option>Most natural front hairline (Life 4 months)</option>
+                  <option>Natural front hairline (Life 6 months)</option>
+                  <option>Durable front hairline (Life 12 months)</option>
+                  <option>As per your guidance</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Preferred Density/Volume</label>
+              <select id="fDensity">
+                <option value="">— Select —</option>
+                <option>High density system</option><option>Low density system</option><option>Not sure, need guidance</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Hair Loss History -->
+          <div class="form-section">
+            <h3>📊 Hair Loss History</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Hair fall since?</label>
+                <select id="fHairfallYears">
+                  <option value="">— Select —</option>
+                  <option>Less than 1 year</option><option>1-2 years</option><option>2-4 years</option>
+                  <option>4-6 years</option><option>More than 6 years</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Gotten a hair system before?</label>
+                <select id="fHairSystem"><option value="">— Select —</option><option>Yes</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>How long considering hair patch?</label>
+                <select id="fConsidering">
+                  <option value="">— Select —</option>
+                  <option>Less than a month</option><option>1-3 months</option><option>3-6 months</option><option>More than 6 months</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Done hair transplant before?</label>
+                <select id="fTransplant"><option value="">— Select —</option><option>Yes</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Natural hair density</label>
+                <select id="fNaturalDensity"><option value="">— Select —</option><option>Low</option><option>Medium</option><option>High</option></select>
+              </div>
+              <div class="form-group">
+                <label>Do you ride a bike often?</label>
+                <select id="fBikeRide"><option value="">— Select —</option><option>I don't</option><option>Everyday</option><option>Once a Week</option></select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Current hair loss pattern</label>
+              <select id="fHairLossPattern">
+                <option value="">— Select —</option>
+                <option>Receding hairline</option><option>Crown thinning</option><option>Overall thinning</option><option>Bald patches</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Hair Characteristics -->
+          <div class="form-section">
+            <h3>💇 Hair Characteristics</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Hair Color</label>
+                <select id="fHairColor">
+                  <option value="">— Select —</option>
+                  <option>Black</option><option>Dark Brown</option><option>Light Brown</option>
+                  <option>Blonde</option><option>Grey</option><option>Salt & Pepper</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Hair Texture</label>
+                <select id="fHairTexture"><option value="">— Select —</option><option>Straight</option><option>Wavy</option><option>Curly</option><option>Mixed</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Preferred Hair Length</label>
+                <select id="fHairLength">
+                  <option value="">— Select —</option>
+                  <option>Short (1-2 inches)</option><option>Medium (3-4 inches)</option><option>Long (5+ inches)</option><option>As per your suggestion</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Budget Range</label>
+                <select id="fBudget">
+                  <option value="">— Select —</option>
+                  <option>Economy - Budget friendly</option><option>Standard - Moderate budget</option><option>Premium - No constraint</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div class="form-section">
+            <h3>📸 Photos</h3>
+            <p class="form-helper">Enter photo URLs or file paths</p>
+            <div class="form-row">
+              <div class="form-group"><label>Photo Top</label><input id="fPhotoTop" placeholder="URL or file path" /></div>
+              <div class="form-group"><label>Photo Back</label><input id="fPhotoBack" placeholder="URL or file path" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Photo Front</label><input id="fPhotoFront" placeholder="URL or file path" /></div>
+              <div class="form-group"><label>Photo Side</label><input id="fPhotoSide" placeholder="URL or file path" /></div>
+            </div>
+          </div>
+
+          <!-- Additional Requirements -->
+          <div class="form-section">
+            <h3>✅ Additional Requirements</h3>
+            <div class="checkbox-group">
+              <div class="checkbox-item"><input type="checkbox" id="req1" value="Quick Service"><label for="req1">Quick Service</label></div>
+              <div class="checkbox-item"><input type="checkbox" id="req2" value="Premium Quality"><label for="req2">Premium Quality</label></div>
+              <div class="checkbox-item"><input type="checkbox" id="req3" value="Budget Friendly"><label for="req3">Budget Friendly</label></div>
+              <div class="checkbox-item"><input type="checkbox" id="req4" value="Easy Maintenance"><label for="req4">Easy Maintenance</label></div>
+              <div class="checkbox-item"><input type="checkbox" id="req5" value="Natural Look"><label for="req5">Natural Look</label></div>
+              <div class="checkbox-item"><input type="checkbox" id="req6" value="Long Lasting"><label for="req6">Long Lasting</label></div>
+            </div>
+            <div class="form-group full" style="margin-top:12px">
+              <label>Additional Notes</label>
+              <textarea id="fNotes" placeholder="Any special requirements, concerns, or additional information..."></textarea>
+            </div>
+          </div>
+
+          <!-- Status & Assignment -->
+          <div class="form-section">
+            <h3>📌 Status & Assignment</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="fStatus">
+                  <option>Form Pending</option>
+                  <option>Form Completed</option>
+                  <option>Consultation Scheduled</option>
+                  <option>Consultation Done</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Follow-up Date</label>
+                <input id="fFollowupDate" type="date" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Assigned To</label>
+              <select id="fAssignedTo">
+                <option value="">— Select Consultant —</option>
+                <option>Dr. Sharma</option><option>Dr. Patel</option><option>Dr. Kumar</option>
+                <option>Consultant A</option><option>Consultant B</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn-large btn-save">💾 Save Consultation Form</button>
+            <button type="button" class="btn-large btn-cancel" onclick="closeModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Session ===== */
+    const displayUser = document.getElementById("userDisplay");
+    const username = sessionStorage.getItem("currentUserName");
+    const loginTime = parseInt(sessionStorage.getItem("loginTimestamp") || "0", 10);
+    const THIRTY_MIN = 30 * 60 * 1000;
+
+    if (!username || Date.now() - loginTime > THIRTY_MIN) {
+      logout();
+    } else {
+      sessionStorage.setItem("loginTimestamp", Date.now().toString());
+      displayUser.textContent = (username || "CRM Staff").toUpperCase();
+    }
+    function logout(){
+      sessionStorage.clear();
+      // use your deployed URL:
+      window.location.href = "https://script.google.com/a/macros/americanhairline.com/s/AKfycbxB__QaMjDvraXmnd6I8sGimwwZCOGnie9qoMiFeTU/dev";
+    }
+
+    /* ===== Data State ===== */
+    let allClients = [];
+    let filteredClients = [];
+    let selectedClient = null;
+
+    /* ===== Fetch Clients ===== */
+    if (username){
+      google.script.run
+        .withSuccessHandler((clients)=>{
+          allClients = clients || [];
+          filteredClients = [...allClients];
+          populateCities();
+          renderClients();
+          updateStats();
+        })
+        .withFailureHandler((err)=>{
+          console.error(err);
+          alert("Failed to load clients. Please refresh.");
+        })
+        .getClientsData(username);
+    }
+
+    /* ===== Filters ===== */
+    function populateCities(){
+      const cities = [...new Set(allClients.map(c=>c.City).filter(Boolean))].sort();
+      document.getElementById("cityFilter").innerHTML =
+        '<option value="All">All Cities</option>' + cities.map(c=>`<option>${c}</option>`).join('');
+    }
+    function filterClients(){
+      const q = (document.getElementById("searchInput").value || "").toLowerCase();
+      const city = document.getElementById("cityFilter").value;
+      const status = document.getElementById("statusFilter").value;
+
+      filteredClients = allClients.filter(c=>{
+        const matchesQ = !q || c.ClientName?.toLowerCase().includes(q) || c.Mobile?.includes(q) || c.LeadId?.toLowerCase().includes(q);
+        const matchesCity = city === "All" || c.City === city;
+        const matchesStatus = status === "All" || c.FormStatus === status;
+        return matchesQ && matchesCity && matchesStatus;
+      });
+      renderClients();
+    }
+
+    /* ===== Render List ===== */
+    function renderClients() {
+      const container = document.getElementById("listContent");
+      const empty = document.getElementById("emptyState");
+
+      if (!filteredClients.length) {
+        container.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+
+      empty.style.display = "none";
+      container.innerHTML = filteredClients.map(c => {
+        const initials = (c.ClientName || "?")
+          .split(" ")
+          .map(n => n[0] || "")
+          .join("")
+          .substring(0, 2)
+          .toUpperCase();
+
+        const loc = [c.City, c.Town].filter(Boolean).join(", ") || "—";
+
+        // 🟢 Smart status mapping
+        let statusClass = "pending";
+        let statusLabel = "FORM PENDING";
+
+        if (c.FormStatus === "Completed" || c.FormStatus === "Pre Consultation Done") {
+          statusClass = "done";
+          statusLabel = "PRE CONSULTATION DONE";
+        } else if (c.FormStatus === "Consultation Booked") {
+          statusClass = "booked";
+          statusLabel = "CONSULTATION BOOKED";
+        } else if (c.FormStatus === "Form Pending") {
+          statusClass = "pending";
+          statusLabel = "FORM PENDING";
+        }
+
+        return `
+          <div class="list-item" id="item-${c.LeadId}" onclick="selectClient('${c.LeadId}')">
+            <div class="avatar">${initials}</div>
+            <div class="list-content">
+              <div class="client-info">
+                <h4>${c.ClientName || "—"}</h4>
+                <span class="lead-id">Lead ID - ${c.LeadId || "—"}</span>
+              </div>
+              <div class="contact-info">
+                <div class="info-row">📱 ${c.Mobile || "—"}</div>
+              </div>
+              <div class="location-info">
+                <div class="info-row">📍 ${loc}</div>
+              </div>
+              <div class="status-info">
+                <span class="status ${statusClass}">${statusLabel}</span>
+              </div>
+              <div class="action-btn">
+                <button class="btn-fill" onclick="event.stopPropagation(); openConsultationForm('${c.LeadId}')">📋 Fill Form</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectClient(leadId){
+      document.querySelectorAll(".list-item").forEach(el=>el.classList.remove("selected"));
+      const el = document.getElementById("item-"+leadId);
+      if (el) el.classList.add("selected");
+      selectedClient = allClients.find(c=>c.LeadId === leadId) || null;
+    }
+
+    /* ===== Modal & Form ===== */
+    function openConsultationForm(leadId){
+      const c = allClients.find(x=>x.LeadId === leadId);
+      if (!c){ alert("Client not found"); return; }
+      selectedClient = c;
+
+      document.getElementById("modalClientName").textContent = c.ClientName || "—";
+      document.getElementById("modalLeadId").textContent = c.LeadId || "—";
+      document.getElementById("modalMobile").textContent = c.Mobile || "—";
+      document.getElementById("modalCity").textContent = [c.City, c.Town].filter(Boolean).join(", ") || "—";
+      document.getElementById("modalAvatar").textContent = (c.ClientName || "A").split(" ").map(n=>n[0]||"").join("").substring(0,2).toUpperCase();
+
+      // Prefill
+      document.getElementById("fLeadId").value = c.LeadId || "";
+      document.getElementById("fTimestamp").value = new Date().toLocaleString("en-IN");
+      document.getElementById("fFullName").value = c.ClientName || "";
+      document.getElementById("fWhatsApp").value = c.Mobile || "";
+      document.getElementById("fCity").value = c.City || "";
+      document.getElementById("fAssignedTo").value = (sessionStorage.getItem("currentUserName") || "").toString();
+
+      // Clear the rest
+      [
+        "fEmail","fAge","fDOB","fSource","fInterest","fAttachment","fSystemType","fDensity","fHairfallYears",
+        "fHairSystem","fConsidering","fTransplant","fNaturalDensity","fBikeRide","fHairLossPattern",
+        "fHairColor","fHairTexture","fHairLength","fBudget","fPhotoTop","fPhotoBack","fPhotoFront","fPhotoSide",
+        "fNotes","fFollowupDate"
+      ].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ""; });
+
+      document.querySelectorAll(".checkbox-item input").forEach(cb=>cb.checked=false);
+      document.getElementById("fStatus").value = "Form Completed";
+
+      document.getElementById("modalOverlay").classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(){
+      document.getElementById("modalOverlay").classList.remove("active");
+      document.body.style.overflow = "auto";
+    }
+
+    function saveConsultationForm(){
+      const fullName = document.getElementById("fFullName").value.trim();
+      const whatsapp = document.getElementById("fWhatsApp").value.trim();
+      if (!fullName || !whatsapp){ alert("Please fill required fields: Full Name and WhatsApp"); return; }
+
+      const checklist = [];
+      document.querySelectorAll(".checkbox-item input:checked").forEach(cb=>checklist.push(cb.value));
+
+      const data = {
+        LeadId: document.getElementById("fLeadId").value,
+        Timestamp: document.getElementById("fTimestamp").value,
+        FullName: fullName,
+        WhatsApp: whatsapp,
+        Email: document.getElementById("fEmail").value,
+        Age: document.getElementById("fAge").value,
+        DOB: document.getElementById("fDOB").value,
+        City: document.getElementById("fCity").value,
+        Source: document.getElementById("fSource").value,
+        InterestedIn: document.getElementById("fInterest").value,
+        AttachmentMethod: document.getElementById("fAttachment").value,
+        SystemType: document.getElementById("fSystemType").value,
+        Density: document.getElementById("fDensity").value,
+        HairfallYears: document.getElementById("fHairfallYears").value,
+        HairSystem: document.getElementById("fHairSystem").value,
+        Considering: document.getElementById("fConsidering").value,
+        Transplant: document.getElementById("fTransplant").value,
+        NaturalDensity: document.getElementById("fNaturalDensity").value,
+        BikeRide: document.getElementById("fBikeRide").value,
+        HairLossPattern: document.getElementById("fHairLossPattern").value,
+        HairColor: document.getElementById("fHairColor").value,
+        HairTexture: document.getElementById("fHairTexture").value,
+        HairLength: document.getElementById("fHairLength").value,
+        Budget: document.getElementById("fBudget").value,
+        PhotoTop: document.getElementById("fPhotoTop").value,
+        PhotoBack: document.getElementById("fPhotoBack").value,
+        PhotoFront: document.getElementById("fPhotoFront").value,
+        PhotoSide: document.getElementById("fPhotoSide").value,
+        AdditionalRequirements: checklist.join(", "),
+        AdditionalNotes: document.getElementById("fNotes").value,
+        Status: document.getElementById("fStatus").value,
+        FollowupDate: document.getElementById("fFollowupDate").value,
+        AssignedTo: document.getElementById("fAssignedTo").value
+      };
+
+      google.script.run
+        .withSuccessHandler((res)=>{
+          if (res && res.success){
+            // toast
+            const toast = document.getElementById("popupMessage");
+            toast.classList.add("show");
+            // mark completed in local state
+            if (selectedClient) selectedClient.FormStatus = "Completed";
+            updateStats();
+            setTimeout(()=>{ toast.classList.remove("show"); }, 2200);
+            setTimeout(()=>{ closeModal(); renderClients(); }, 1800);
+          } else {
+            alert("❌ Failed to save: " + (res?.message || "Unknown error"));
+          }
+        })
+        .withFailureHandler(err=>{
+          console.error(err);
+          alert("❌ Error saving form. Please try again.");
+        })
+        .saveConsultationData(data);
+    }
+
+    /* ===== Stats ===== */
+    function updateStats(){
+      const pending = allClients.filter(c=>c.FormStatus==="Pending").length;
+      const completed = allClients.filter(c=>c.FormStatus==="Completed").length;
+      document.getElementById("statTotal").textContent = allClients.length;
+      document.getElementById("statPending").textContent = pending;
+      document.getElementById("statCompleted").textContent = completed;
+      // today's forms if you have a field; leaving as count of completed today if needed
+      document.getElementById("statToday").textContent = completed; 
+    }
+  </script>
+</body>
+</html>
