@@ -1,0 +1,201 @@
+/*****************************************************
+ * American Hairline – Consultation CRM Backend (v3)
+ * Role-based filtering + auto status update
+ * Spreadsheet ID: 1pc8SP5ipEZCnv3LRnEoYKNMKZs0XdXFxQtD4sGqsUto
+ *****************************************************/
+const SPREADSHEET_ID = '1pc8SP5ipEZCnv3LRnEoYKNMKZs0XdXFxQtD4sGqsUto';
+const CLIENTS_SHEET = 'Clients';
+const PRECONSULT_SHEET = 'PreConsultationData';
+const USERS_SHEET = 'Users';
+
+
+/** ✅ Fetch client data for logged-in user */
+function getClientsData(username) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(CLIENTS_SHEET);
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+  const result = [];
+
+  const idx = {};
+  headers.forEach((h, i) => idx[h.trim()] = i);
+  const statusCol = headers.indexOf("Lead Status") + 1;
+  const updates = [];
+
+  // Fetch current user's role (for filtering)
+  const userRole = getUserRole_(username);
+
+  data.forEach((row, i) => {
+    const leadId = row[idx["Lead Unique ID"]];
+    if (!leadId) return;
+
+    const status = row[idx["Lead Status"]];
+    const clientName = row[idx["Client Name"]];
+    const city = row[idx["City"]];
+    const town = row[idx["Town"]];
+    const mobile = row[idx["Mobile No"]];
+    const assignedTo = row[idx["Assigned To"]] || "";
+
+    // 🟡 Auto-set "Pre Consultation Pending" if blank
+    if (!status || status.toString().trim() === "") {
+      updates.push(i + 2);
+      row[idx["Lead Status"]] = "Pre Consultation Pending";
+    }
+
+    // 👥 Role-based filter
+    // Admins see all leads; CRM users see only their assigned leads
+    if (userRole === "Admin" || assignedTo.toLowerCase() === username.toLowerCase()) {
+      result.push({
+        LeadId: leadId,
+        ClientName: clientName,
+        Mobile: mobile,
+        City: city,
+        Town: town,
+        FormStatus: row[idx["Lead Status"]] || "Pre Consultation Pending",
+        AssignedTo: assignedTo
+      });
+    }
+  });
+
+  // ✅ Update statuses in sheet
+  if (updates.length > 0) {
+    updates.forEach(r => sheet.getRange(r, statusCol).setValue("Pre Consultation Pending"));
+  }
+
+  return result;
+}
+
+/** ✅ Save Pre-Consultation Form + update client status conditionally */
+function saveConsultationData(formData) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const formSheet = ss.getSheetByName(PRECONSULT_SHEET);
+  const clientSheet = ss.getSheetByName(CLIENTS_SHEET);
+
+  // Create headers if empty
+  if (formSheet.getLastRow() === 0) {
+    const headers = [
+      'Timestamp','Lead ID','Full Name','WhatsApp','Email','Age','DOB','City','Source',
+      'Interested In','Attachment Method','System Type','Density','Hairfall Since',
+      'Got Hair System Before','Considering Since','Hair Transplant','Natural Density',
+      'Bike Ride','Hair Loss Pattern','Hair Color','Hair Texture','Hair Length','Budget',
+      'Photo Top','Photo Back','Photo Front','Photo Side','Additional Requirements',
+      'Additional Notes','Status','Follow-up Date','Assigned To'
+    ];
+    formSheet.appendRow(headers);
+  }
+
+  const row = [
+    new Date(),
+    formData.LeadId || '',
+    formData.FullName || '',
+    formData.WhatsApp || '',
+    formData.Email || '',
+    formData.Age || '',
+    formData.DOB || '',
+    formData.City || '',
+    formData.Source || '',
+    formData.InterestedIn || '',
+    formData.AttachmentMethod || '',
+    formData.SystemType || '',
+    formData.Density || '',
+    formData.HairfallYears || '',
+    formData.HairSystem || '',
+    formData.Considering || '',
+    formData.Transplant || '',
+    formData.NaturalDensity || '',
+    formData.BikeRide || '',
+    formData.HairLossPattern || '',
+    formData.HairColor || '',
+    formData.HairTexture || '',
+    formData.HairLength || '',
+    formData.Budget || '',
+    formData.PhotoTop || '',
+    formData.PhotoBack || '',
+    formData.PhotoFront || '',
+    formData.PhotoSide || '',
+    formData.AdditionalRequirements || '',
+    formData.AdditionalNotes || '',
+    formData.Status || '',
+    formData.FollowupDate || '',
+    formData.AssignedTo || ''
+  ];
+
+  formSheet.appendRow(row);
+
+  // ✅ Only update Clients sheet if Status = 'Form Completed'
+  if (formData.Status === 'Form Completed') {
+    const clientData = clientSheet.getDataRange().getValues();
+    const headerRow = clientData[0];
+    const leadCol = headerRow.indexOf('Lead Unique ID');
+    const statusCol = headerRow.indexOf('Lead Status');
+
+    for (let i = 1; i < clientData.length; i++) {
+      if (clientData[i][leadCol] === formData.LeadId) {
+        clientSheet.getRange(i + 1, statusCol + 1).setValue('Pre Consultation Done');
+        break;
+      }
+    }
+  }
+
+  return { success: true, message: '✅ Consultation form saved successfully.' };
+}
+
+
+/** ✅ Return CRM Users (for AssignedTo dropdown) */
+function getUsersList() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(USERS_SHEET);
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+  const idx = {};
+  headers.forEach((h, i) => idx[h.trim()] = i);
+
+  return data
+    .filter(r => r[idx["Username"]] && (!r[idx["IsActive"]] || r[idx["IsActive"]] === true))
+    .map(r => ({
+      Username: r[idx["Username"]],
+      Role: r[idx["Role"]],
+      IsActive: r[idx["IsActive"]] || true
+    }));
+}
+
+/** 🔒 Internal Helper – Find user’s role */
+function getUserRole_(username) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(USERS_SHEET);
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+  const idxUser = headers.indexOf("Username");
+  const idxRole = headers.indexOf("Role");
+
+  for (let i = 0; i < data.length; i++) {
+    if (data[i][idxUser] && data[i][idxUser].toString().toLowerCase() === username.toLowerCase()) {
+      return data[i][idxRole] || "CRM";
+    }
+  }
+  return "CRM"; // default
+}
+/** ✅ Validate Login (from Users sheet) */
+function authenticateUser(username, password) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(USERS_SHEET);
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+
+  const idxUser = headers.indexOf("Username");
+  const idxPass = headers.indexOf("Password");
+  const idxRole = headers.indexOf("Role");
+  const idxActive = headers.indexOf("IsActive");
+
+  for (let i = 0; i < data.length; i++) {
+    const user = (data[i][idxUser] || "").toString().trim().toLowerCase();
+    const pass = (data[i][idxPass] || "").toString().trim();
+    const active = data[i][idxActive] !== false;
+
+    if (user === username.toLowerCase() && pass === password && active) {
+      return { success: true, username: user, role: data[i][idxRole] || "CRM" };
+    }
+  }
+  return { success: false, message: "Invalid username or password." };
+}
+
